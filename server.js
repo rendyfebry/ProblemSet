@@ -167,7 +167,7 @@ router.get('/api/phonebooks/:id', function(req, res){
 });
 
 router.put('/api/phonebooks/:id', function(req, res){
-	Phonebook.update(req.params.id, 
+	Phonebook.update({_id: req.params.id}, 
 		{ 
 			name: req.body.name,
 			title: req.body.title,
@@ -206,6 +206,32 @@ router.delete('/api/phonebooks/:id', function(req, res){
 		}
 	});
 });
+
+router.get('/api/phonebooks-search/:key', function(req, res){
+		Phonebook.find({
+				$or: [
+					{ 'name': req.params.key },
+					{ 'email': req.params.key },
+					{ 'phone': req.params.key },
+					{ 'address': req.params.key },
+					{ 'company': req.params.key }
+				]}, function(err, phonebooks) {
+
+			if(err) res.send(err);
+
+			if(phonebooks.length != 0) {
+				res.json({ 
+					success: true,
+					phonebooks: phonebooks
+				});
+			} else {
+				res.json({ 
+					success: false,
+					message: 'Something wrong!' 
+				});
+			}
+		});
+	});
 
 app.use(router);
 

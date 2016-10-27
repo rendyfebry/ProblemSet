@@ -59,10 +59,21 @@
 						</tbody>
 					</table>
 
-					<!-- Button trigger modal -->
-					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-					  New Input
-					</button>
+					<form class="form-inline" id="search-form">
+						<div class="form-group">
+							<input type="text" id="searchBox" placeholder="Search" class="form-control" oninput="searchPhonebooks()">
+						</div>
+						<div class="form-group">
+							<!-- Button trigger modal -->
+							<input type="submit" class="btn btn-primary" value="Search">
+						</div>
+						<div class="form-group">
+							<!-- Button trigger modal -->
+							<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+							  New Input
+							</button>
+						</div>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -195,7 +206,6 @@
 				var phone = $("#phonebook-edit-form").find("#phone").val();
 				var address = $("#phonebook-edit-form").find("#address").val();
 				var company = $("#phonebook-edit-form").find("#company").val();
-				console.log("http://localhost:3030/api/phonebooks/"+id+'?token='+$.cookie('token'));
 		
 				$.ajax({
 					type: 'PUT',
@@ -212,6 +222,7 @@
 						if(data.success == true) {
 							loadPhonebooks();
 							$('#editModal').modal('toggle');
+							$("#phonebook-edit-form")[0].reset();
 						} else {
 						}
 					}
@@ -290,6 +301,43 @@
 				}
 			});
 			$('#editModal').modal('toggle');
+		}
+
+		function searchPhonebooks() {
+			var key = $("#searchBox").val();
+			if(key != ""){
+				$.ajax({
+					type: 'GET',
+					url: 'http://localhost:3030/api/phonebooks-search/'+key+'?token='+$.cookie('token'),
+					success: function(data){
+						if(data.success == true) {
+							var items = "";
+							var no = 0;
+							$.each(data.phonebooks, function(i, phonebook){
+								no++;
+								items += "<tr>";
+								items += "<td>"+no+"</td>";
+								items += "<td>"+phonebook.title+" "+phonebook.name+"</td>";
+								items += "<td>"+phonebook.email+"</td>";
+								items += "<td>"+phonebook.phone+"</td>";
+								items += "<td>"+phonebook.address+"</td>";
+								items += "<td>"+phonebook.company+"</td>";
+								items += "<td class='text-center'>";
+								items += '<a href="javascript:deletePhonebook(\''+phonebook._id+'\')"><i class="fa fa-trash" aria-hidden="true"></i></a> ';
+								items += '<a href="javascript:editPhonebook(\''+phonebook._id+'\')"><i class="fa fa-pencil" aria-hidden="true"></i></a> ';
+								items += "</td>";
+								items += "</tr>";
+							});
+	
+							$("#targetTable").html(items);
+						} else {
+							$("#targetTable").html("<tr><td>Data not found</td></tr>");
+						}
+					}
+				});
+			} else {
+				loadPhonebooks();
+			}
 		}
 	</script>
 </body>
